@@ -8,12 +8,22 @@ import (
 
 func TestNetstatMonitor(t *testing.T) {
   config := Config{};
-  err := config.LoadFile("./atoll.yml")
+  var err error;
+  err = config.LoadFile("./atoll.yml")
   if err != nil {
     t.Fatalf("Did not expect error %v", err)
   }
   netstat := Netstat{config: &config}
-  netstat.Monitor();
+  var result NetstatInfo;
+  result, err = netstat.Monitor();
+  if err != nil {
+    t.Fatalf("Did not expect error %v", err)
+  }
+  keys := []NetstatPort{}
+  for k := range result.Outgoing {
+    keys = append(keys, k)
+  }
+  assert.Equal(t, len(keys) > 0, true)
 }
 
 func TestNetstatExec(t *testing.T) {
@@ -23,7 +33,6 @@ func TestNetstatExec(t *testing.T) {
     t.Fatalf("Did not expect error %v", err)
   }
   assert.Contains(t, string(data), "LISTEN")
-  //t.Logf("Data: %v", data)
 }
 
 const darwinOutput string = `Proto Recv-Q Send-Q  Local Address          Foreign Address        (state)        rxbytes    txbytes
@@ -87,6 +96,21 @@ tcp4       0      0  127.0.0.1.631          *.*                    LISTEN       
 tcp6       0      0  ::1.631                *.*                    LISTEN               0          0
 `;
 
+func TestNetstatParseDarwin(t *testing.T) {
+  netstat := Netstat{}
+  result, err := netstat.parse(darwinOutput);
+  if err != nil {
+    t.Fatalf("Did not expect error %v", err)
+  }
+  assert.EqualValues(t, result.Outgoing["443"]["216.58.216.14"].Count, 2)
+  data, err2 := json.Marshal(result)
+  if err2 != nil {
+    t.Fatalf("Did not expect error %v", err2)
+  }
+  t.Logf("JSON %s", data)
+  assert.Contains(t, string(data), `127.0.0.1":{"Host":"127.0.0.1","Count":1}`)
+}
+
 const linuxOutput string = `Active Internet connections (servers and established)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State      
 tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN     
@@ -101,15 +125,17 @@ tcp        0      0 10.45.10.220:46170      10.45.10.222:27018      ESTABLISHED
 tcp        0      0 10.45.10.220:57983      10.45.10.198:443       ESTABLISHED
 `;
 
-func TestNetstatParseDarwin(t *testing.T) {
+func TestNetstatParseLinux(t *testing.T) {
   netstat := Netstat{}
-  result, err := netstat.parse(darwinOutput);
+  result, err := netstat.parse(linuxOutput);
   if err != nil {
     t.Fatalf("Did not expect error %v", err)
   }
+  assert.EqualValues(t, result.Outgoing["27018"]["10.45.10.222"].Count, 3)
   data, err2 := json.Marshal(result)
   if err2 != nil {
     t.Fatalf("Did not expect error %v", err2)
   }
   t.Logf("JSON %s", data)
+  assert.Contains(t, string(data), `"22":{}`)
 }

@@ -3,7 +3,6 @@ package main
 
 import (
   "os/exec"
-  "log"
   "strings"
 )
 
@@ -40,8 +39,8 @@ func (this *Netstat) Monitor() (NetstatInfo, error) {
   if err != nil {
     return result, err;
   }
-  log.Printf("%v\n", data)
-  return result, err;
+  result, err = this.parse(data)
+  return result, err
 }
 
 func (this *Netstat) run() (string, error) {
@@ -76,6 +75,7 @@ func (this *Netstat) determineCommand() (string, error) {
 func (this *Netstat) parse(data string) (NetstatInfo, error) {
   result := NetstatInfo{}
   result.Incoming = make(NetstatServices)
+  result.Outgoing = make(NetstatServices)
   listenAddresses := this.parseAddressPairs(data, "LISTEN")
   for i := 0; len(listenAddresses) > i; i++ {
     result.Incoming[listenAddresses[i].Local.Port] = make(NetstatConnections)
@@ -83,9 +83,9 @@ func (this *Netstat) parse(data string) (NetstatInfo, error) {
   establishedAddresses := this.parseAddressPairs(data, "ESTABLISHED")
   for i := 0; len(establishedAddresses) > i; i++ {
     localPort := establishedAddresses[i].Local.Port
-    if _, ok := result.Incoming[localPort]; ok == true {
+    if service, ok := result.Incoming[localPort]; ok == true {
       remoteHost := establishedAddresses[i].Remote.Host
-      if _, ok := result.Incoming[localPort][remoteHost]; ok == true {
+      if _, ok := service[remoteHost]; ok == true {
         result.Incoming[localPort][remoteHost] = NetstatConnection{
           remoteHost, 
           result.Incoming[localPort][remoteHost].Count + 1,
@@ -96,8 +96,24 @@ func (this *Netstat) parse(data string) (NetstatInfo, error) {
           1,
         };
       }
+      continue
     }
-    
+    remotePort := establishedAddresses[i].Remote.Port
+    if _, ok := result.Outgoing[remotePort]; ok == false {
+      result.Outgoing[remotePort] = make(NetstatConnections);
+    }
+    remoteHost := establishedAddresses[i].Remote.Host
+    if _, ok := result.Outgoing[remotePort][remoteHost]; ok == true {
+      result.Outgoing[remotePort][remoteHost] = NetstatConnection{
+        remoteHost, 
+        result.Outgoing[remotePort][remoteHost].Count + 1,
+      };
+    } else {
+      result.Outgoing[remotePort][remoteHost] = NetstatConnection{
+        remoteHost, 
+        1,
+      };
+    }
   }
   return result, nil
 }
@@ -121,7 +137,6 @@ func (this *Netstat) parseAddressPairs(data string, state string) []NetstatAddre
         remoteAddress,
       }
       pairs = append(pairs, pair)
-      log.Printf("%v %v %v", state, localAddress.Host, localAddress.Port);
     }
     
   }
