@@ -14,11 +14,12 @@ func TestNetstatMonitor(t *testing.T) {
     t.Fatalf("Did not expect error %v", err)
   }
   netstat := Netstat{config: &config}
-  var result NetstatInfo;
-  result, err = netstat.Monitor();
+  var info Info;
+  info, err = netstat.Monitor();
   if err != nil {
     t.Fatalf("Did not expect error %v", err)
   }
+  result := info.(NetstatInfo)
   keys := []NetstatPort{}
   for k := range result.Outgoing {
     keys = append(keys, k)

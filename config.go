@@ -8,12 +8,14 @@ import (
 )
 
 type Config struct {
+  HOSTNAME string;
   SERVER struct {
     BIND string;
     PORT int;
   }
   PUBLISH struct {
     HOST string;
+    PORT int;
     FREQUENCY string;
   }
   NETSTAT struct {

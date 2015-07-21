@@ -4,6 +4,7 @@ package main
 import (
   "os/exec"
   "strings"
+  "encoding/json"
 )
 
 type NetstatHost string;
@@ -33,14 +34,19 @@ type Netstat struct {
   config *Config;
 };
 
-func (this *Netstat) Monitor() (NetstatInfo, error) {
+func (this NetstatInfo) Encode() ([]byte, error) {
+  return json.Marshal(this)
+}
+
+func (this Netstat) Monitor() (Info, error) {
   data, err := this.run();
   var result NetstatInfo;
   if err != nil {
     return result, err;
   }
   result, err = this.parse(data)
-  return result, err
+  info := Info(result);
+  return info, err
 }
 
 func (this *Netstat) run() (string, error) {
