@@ -23,9 +23,18 @@ func main() {
       Value: "atoll.yml",
       Usage: "Configuration file to use",
     },
+    cli.StringFlag{
+      Name: "hostname, hn",
+      Value: "",
+      Usage: "Set primary hostname for this node",
+    },
+    cli.StringFlag{
+      Name: "frequency, f",
+      Value: "",
+      Usage: "Set reporting frequency (Default: 5s)",
+    },
   }
   app.Action = func(c *cli.Context) {
-    println("Config: ", c.String("config"))
     var err error;
 
     config := Config{}
@@ -33,13 +42,29 @@ func main() {
     if err != nil {
       fatalError(err)
     }
-    fmt.Printf("%v\n", config)
+
+    hostname := c.String("hostname");
+    if len(hostname) > 0 {
+      config.Hostname = hostname;
+    }
+
+    frequency := c.String("frequency");
+    if len(frequency) > 0 {
+      config.Publish.Frequency = frequency;
+    }
 
     var data []byte;
-
     data, err = config.ToJSON()
     fmt.Printf("%s\n", data)
 
+    url := fmt.Sprintf("http://%s:%d/1/report", config.Publish.Host, config.Publish.Port)
+    log.Printf("Publish URL: %s\n", url);
+    log.Printf("Publish Frequency: %s\n", config.Publish.Frequency);
+    reporter := Reporter{&config, Netstat{config: &config}, true, "netstat", url};
+    err = reporter.Start();
+    if err != nil {
+      log.Fatalf("Error: %v\n", err)
+    }
   }
 
   app.Run(os.Args)

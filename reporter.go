@@ -70,12 +70,19 @@ func (this *Reporter) GetHostInfo() (HostInfo) {
 }
 
 func (this *Reporter) Start() (error) {
+  numSeconds, err := IntervalToSeconds(this.config.Publish.Frequency);
+  if numSeconds == 0 {
+    return errors.New("Need an interval of at least 1 second")
+  }
+  if err != nil {
+    return errors.New("Invalid interval configured")
+  }
   for this.running == true {
     err := this.Report();
     if err != nil {
-      fmt.Fprintf(os.Stderr, "Warning, could not report: %v", err);
+      fmt.Fprintf(os.Stderr, "Warning, could not report: %v\n", err);
     }
-    time.Sleep(3000 * time.Millisecond);
+    time.Sleep(time.Duration(numSeconds) * time.Second);
   }
   return nil
 }
