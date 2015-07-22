@@ -109,7 +109,7 @@ func TestNetstatParseDarwin(t *testing.T) {
     t.Fatalf("Did not expect error %v", err)
   }
   t.Logf("JSON %s", data)
-  assert.Contains(t, string(data), `127.0.0.1":{"Host":"127.0.0.1","Count":1}`)
+  assert.Contains(t, string(data), `127.0.0.1":{"host":"127.0.0.1","count":1}`)
 }
 
 const linuxOutput string = `Active Internet connections (servers and established)

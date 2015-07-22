@@ -8,18 +8,18 @@ import (
 )
 
 type Config struct {
-  HOSTNAME string;
-  SERVER struct {
-    BIND string;
-    PORT int;
-  }
-  PUBLISH struct {
-    HOST string;
-    PORT int;
-    FREQUENCY string;
-  }
-  NETSTAT struct {
-    INCLUDE_LOCAL bool;
+  Hostname string `json:"hostname"`;
+  Server struct {
+    Bind string    `json:"bind"`;
+    Port int       `json:"port"`;
+  }               `json:"server"`;
+  Publish struct {
+    Host string    `json:"host"`;
+    Port int       `json:"port"`;
+    Frequency string;
+  }               `json:"publish"`;
+  Netstat struct {
+    IncludeLocal bool `json:"includeLocal"`;
   }
 }
 

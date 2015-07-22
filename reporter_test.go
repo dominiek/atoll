@@ -12,7 +12,7 @@ import (
 
 func TestReporterWithNetstat(t *testing.T) {
   config := Config{};
-  config.HOSTNAME = "0.host"
+  config.Hostname = "0.localhost"
 
   var requestBody []byte
   handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +37,7 @@ func TestReporterWithNetstat(t *testing.T) {
   hostnames, _ := jsonParsed.S("host").S("hostnames").Children()
   assert.Equal(t, len(hostnames) > 0, true)
 
-  children, _ := jsonParsed.S("report").S("Outgoing").ChildrenMap()
+  children, _ := jsonParsed.S("report").S("outgoing").ChildrenMap()
   var keys = []string{}
   for key := range children {
     keys = append(keys, key)
@@ -47,7 +47,7 @@ func TestReporterWithNetstat(t *testing.T) {
 
 func TestReporterGetHostInfo(t *testing.T) {
   config := Config{};
-  config.HOSTNAME = "0.localhost"
+  config.Hostname = "0.localhost"
   reporter := Reporter{&config, Netstat{config: &config}, true, "netstat", "http://localhost:47011"};
   hostInfo := reporter.GetHostInfo();
   assert.Equal(t, len(hostInfo.Hostnames), 1)

@@ -28,9 +28,9 @@ type Reporter struct {
 }
 
 type HostInfo struct {
-  Hostnames []string `json:"hostnames"`;
-  Uname string `json:"uname"`;
-  UnameA string `json:"unameA"`;
+  Hostnames []string  `json:"hostnames"`;
+  Uname     string    `json:"uname"`;
+  UnameA    string    `json:"unameA"`;
 }
 
 func (this *Reporter) Report() (error) {
@@ -62,10 +62,9 @@ func (this *Reporter) Report() (error) {
 func (this *Reporter) GetHostInfo() (HostInfo) {
   hostInfo := HostInfo{};
   hostInfo.Hostnames = make([]string, 0);
-  if len(this.config.HOSTNAME) > 0 {
-    hostInfo.Hostnames = append(hostInfo.Hostnames, this.config.HOSTNAME);
+  if len(this.config.Hostname) > 0 {
+    hostInfo.Hostnames = append(hostInfo.Hostnames, this.config.Hostname);
   }
-  hostInfo.Uname = "Darwin"
   // TODO get all hostnames and IP addresses for host
   return hostInfo;
 }

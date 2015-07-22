@@ -10,24 +10,24 @@ import (
 type NetstatHost string;
 type NetstatPort string;
 type NetstatAddress struct {
-  Host NetstatHost
-  Port NetstatPort
+  Host NetstatHost `json:"host"`;
+  Port NetstatPort `json:"port"`;
 }
 type NetstatAddressPair struct {
-  Local NetstatAddress
-  Remote NetstatAddress
+  Local NetstatAddress   `json:"local"`;
+  Remote NetstatAddress  `json:"remote"`;
 }
 type NetstatConnection struct {
-  Host NetstatHost
-  Count uint64
+  Host NetstatHost `json:"host"`;
+  Count uint64     `json:"count"`;
 }
 
 type NetstatConnections map[NetstatHost]NetstatConnection;
 type NetstatServices map[NetstatPort]NetstatConnections;
 
 type NetstatInfo struct {
-  Outgoing NetstatServices
-  Incoming NetstatServices
+  Outgoing NetstatServices `json:"outgoing"`;
+  Incoming NetstatServices `json:"incoming"`;
 }
 
 type Netstat struct {
