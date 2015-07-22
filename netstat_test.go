@@ -104,9 +104,9 @@ func TestNetstatParseDarwin(t *testing.T) {
     t.Fatalf("Did not expect error %v", err)
   }
   assert.EqualValues(t, result.Outgoing["443"]["216.58.216.14"].Count, 2)
-  data, err2 := json.Marshal(result)
-  if err2 != nil {
-    t.Fatalf("Did not expect error %v", err2)
+  data, err := json.Marshal(result)
+  if err != nil {
+    t.Fatalf("Did not expect error %v", err)
   }
   t.Logf("JSON %s", data)
   assert.Contains(t, string(data), `127.0.0.1":{"Host":"127.0.0.1","Count":1}`)
@@ -133,9 +133,9 @@ func TestNetstatParseLinux(t *testing.T) {
     t.Fatalf("Did not expect error %v", err)
   }
   assert.EqualValues(t, result.Outgoing["27018"]["10.45.10.222"].Count, 3)
-  data, err2 := json.Marshal(result)
-  if err2 != nil {
-    t.Fatalf("Did not expect error %v", err2)
+  data, err := json.Marshal(result)
+  if err != nil {
+    t.Fatalf("Did not expect error %v", err)
   }
   t.Logf("JSON %s", data)
   assert.Contains(t, string(data), `"22":{}`)

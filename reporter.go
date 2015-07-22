@@ -6,6 +6,9 @@ import (
   "bytes"
   "net/http"
   "errors"
+  "os"
+  "fmt"
+  "encoding/json"
 )
 
 type Info interface {
@@ -25,9 +28,9 @@ type Reporter struct {
 }
 
 type HostInfo struct {
-  hostnames []string;
-  uname string;
-  unameA string;
+  Hostnames []string `json:"hostnames"`;
+  Uname string `json:"uname"`;
+  UnameA string `json:"unameA"`;
 }
 
 func (this *Reporter) Report() (error) {
@@ -35,17 +38,20 @@ func (this *Reporter) Report() (error) {
   if err != nil {
     return err;
   }
-  data, err := info.Encode();
+  reportData, err := info.Encode();
   if err != nil {
     return err
   }
-  req, err := http.NewRequest("POST", this.url, bytes.NewBuffer(data))
+  hostData, err := json.Marshal(this.GetHostInfo());
+  envelope := fmt.Sprintf(`{"host":%s,"report":%s}`, hostData, reportData);
+  req, err := http.NewRequest("POST", this.url, bytes.NewBuffer([]byte(envelope)))
   req.Header.Set("Content-Type", "application/json")
   client := &http.Client{}
   resp, err := client.Do(req)
   if err != nil {
     return err
   }
+  fmt.Fprintf(os.Stdout, "Reported %s status to %s", this.moduleType, this.url);
   defer resp.Body.Close()
   if resp.StatusCode != 200 {
     return errors.New("Invalid response from Atoll server: " + resp.Status)
@@ -55,18 +61,22 @@ func (this *Reporter) Report() (error) {
 
 func (this *Reporter) GetHostInfo() (HostInfo) {
   hostInfo := HostInfo{};
-  hostInfo.hostnames = make([]string, 0);
+  hostInfo.Hostnames = make([]string, 0);
   if len(this.config.HOSTNAME) > 0 {
-    hostInfo.hostnames = append(hostInfo.hostnames, this.config.HOSTNAME)
+    hostInfo.Hostnames = append(hostInfo.Hostnames, this.config.HOSTNAME);
   }
+  hostInfo.Uname = "Darwin"
   // TODO get all hostnames and IP addresses for host
   return hostInfo;
 }
 
 func (this *Reporter) Start() (error) {
   for this.running == true {
-     println("Hello")
-     time.Sleep(3000 * time.Millisecond);
+    err := this.Report();
+    if err != nil {
+      fmt.Fprintf(os.Stderr, "Warning, could not report: %v", err);
+    }
+    time.Sleep(3000 * time.Millisecond);
   }
   return nil
 }

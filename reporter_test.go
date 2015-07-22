@@ -7,10 +7,12 @@ import (
   "net/http"
   "fmt"
   "io/ioutil"
+  "github.com/jeffail/gabs"
 )
 
 func TestReporterWithNetstat(t *testing.T) {
   config := Config{};
+  config.HOSTNAME = "0.host"
 
   var requestBody []byte
   handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +31,18 @@ func TestReporterWithNetstat(t *testing.T) {
 
   t.Logf("Mock URL for reporter: %v", url)
   t.Logf("Data sent: %s", requestBody)
+  jsonParsed, err := gabs.ParseJSON(requestBody)
   assert.Equal(t, err, nil)
+
+  hostnames, _ := jsonParsed.S("host").S("hostnames").Children()
+  assert.Equal(t, len(hostnames) > 0, true)
+
+  children, _ := jsonParsed.S("report").S("Outgoing").ChildrenMap()
+  var keys = []string{}
+  for key := range children {
+    keys = append(keys, key)
+  }
+  assert.Equal(t, len(keys) > 0, true)
 }
 
 func TestReporterGetHostInfo(t *testing.T) {
@@ -37,5 +50,5 @@ func TestReporterGetHostInfo(t *testing.T) {
   config.HOSTNAME = "0.localhost"
   reporter := Reporter{&config, Netstat{config: &config}, true, "netstat", "http://localhost:47011"};
   hostInfo := reporter.GetHostInfo();
-  assert.Equal(t, len(hostInfo.hostnames), 1)
+  assert.Equal(t, len(hostInfo.Hostnames), 1)
 }
