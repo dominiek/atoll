@@ -51,7 +51,7 @@ func (this *Reporter) Report() (error) {
   if err != nil {
     return err
   }
-  fmt.Fprintf(os.Stdout, "Reported %s status to %s", this.moduleType, this.url);
+  fmt.Fprintf(os.Stdout, "Reported %s status to %s\n", this.moduleType, this.url);
   defer resp.Body.Close()
   if resp.StatusCode != 200 {
     return errors.New("Invalid response from Atoll server: " + resp.Status)

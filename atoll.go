@@ -6,6 +6,7 @@ import (
   "fmt"
   "log"
   "github.com/codegangsta/cli"
+  "github.com/VividCortex/godaemon"
 )
 
 func fatalError(err error) {
@@ -22,6 +23,10 @@ func main() {
       Name: "config, c",
       Value: "atoll.yml",
       Usage: "Configuration file to use",
+    },
+    cli.BoolFlag{
+      Name: "detach, d",
+      Usage: "Detach process and run as daemon",
     },
     cli.StringFlag{
       Name: "hostname, hn",
@@ -89,6 +94,10 @@ func main() {
     frequency := c.String("frequency");
     if len(frequency) > 0 {
       config.Publish.Frequency = frequency;
+    }
+
+    if (c.Bool("detach")) {
+      godaemon.MakeDaemon(&godaemon.DaemonAttr{})
     }
 
     var data []byte;
