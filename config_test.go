@@ -11,7 +11,7 @@ func TestLoadFile(t *testing.T) {
   if err != nil {
     t.Fatalf("Did not expect error %v", err)
   }
-  assert.Equal(t, "127.0.0.1", config.Server.Bind)
+  assert.Equal(t, "api.atoll.io", config.Publish.Host)
 }
 
 func TestToJSON(t *testing.T) {
@@ -24,5 +24,5 @@ func TestToJSON(t *testing.T) {
 
   var data []byte;
   data, err = config.ToJSON()
-  assert.Contains(t, string(data), "\"bind\":")
+  assert.Contains(t, string(data), "\"publish\":")
 }

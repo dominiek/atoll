@@ -1,9 +1,7 @@
-server:
-  bind: 127.0.0.1
-  port: 47010
+hostname: ""
 publish:
-  host: localhost
+  host: api.atoll.io
   port: 47011
   frequency: 5s
 netstat:
-  includeLocal: false
+  includelocal: false

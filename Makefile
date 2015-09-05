@@ -9,3 +9,6 @@ all:
 
 clean:
 	rm -rf bin
+
+test:
+	go test *.go

@@ -9,10 +9,6 @@ import (
 
 type Config struct {
   Hostname string `json:"hostname"`;
-  Server struct {
-    Bind string    `json:"bind"`;
-    Port int       `json:"port"`;
-  }               `json:"server"`;
   Publish struct {
     Host string    `json:"host"`;
     Port int       `json:"port"`;
@@ -29,6 +25,18 @@ func (config *Config) LoadFile(path string) error {
     return err
   }
   err = yaml.Unmarshal(data, config)
+  if err != nil {
+    return err
+  }
+  return nil
+}
+
+func (config *Config) StoreFile(path string) error {
+  data, err := yaml.Marshal(config)
+  if err != nil {
+    return err
+  }
+  err = ioutil.WriteFile(path, data, 0644);
   if err != nil {
     return err
   }

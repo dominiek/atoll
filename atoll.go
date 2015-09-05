@@ -34,6 +34,44 @@ func main() {
       Usage: "Set reporting frequency (Default: 5s)",
     },
   }
+  app.Commands = []cli.Command{
+    {
+      Name:      "setup",
+      Usage:     "Generate atoll.yml configuration file",
+      Flags:     []cli.Flag {
+        cli.StringFlag{
+          Name: "publish-host",
+          Value: "api.atoll.io",
+          Usage: "Publish host to configure",
+        },
+        cli.IntFlag{
+          Name: "publish-port",
+          Value: 47011,
+          Usage: "Publish port to configure",
+        },
+        cli.StringFlag{
+          Name: "frequency",
+          Value: "5s",
+          Usage: "Update frequency to configure",
+        },
+        cli.StringFlag{
+          Name: "hostname",
+          Value: "",
+          Usage: "Node hostname to configure",
+        },
+      },
+      Action: func(c *cli.Context) {
+        config := Config{}
+        config.Publish.Host = c.String("publish-host")
+        config.Publish.Port = c.Int("publish-port")
+        config.Publish.Frequency = c.String("frequency")
+        config.Hostname = c.String("hostname")
+        path := c.GlobalString("config")
+        log.Printf("Writing configuration to: %s\n", path);
+        config.StoreFile(path);
+      },
+    },
+  }
   app.Action = func(c *cli.Context) {
     var err error;
 
