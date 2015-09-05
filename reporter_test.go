@@ -50,5 +50,8 @@ func TestReporterGetHostInfo(t *testing.T) {
   config.Hostname = "0.localhost"
   reporter := Reporter{&config, Netstat{config: &config}, true, "netstat", "http://localhost:47011"};
   hostInfo := reporter.GetHostInfo();
+  t.Logf("hostInfo: %v", hostInfo)
   assert.Equal(t, len(hostInfo.Hostnames), 1)
+  assert.Equal(t, len(hostInfo.Uname) > 1, true)
+  assert.Equal(t, len(hostInfo.UnameA) > 1, true)
 }

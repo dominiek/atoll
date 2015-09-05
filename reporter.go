@@ -5,6 +5,7 @@ import (
   "time"
   "bytes"
   "net/http"
+  "os/exec"
   "errors"
   "fmt"
   "log"
@@ -65,6 +66,17 @@ func (this *Reporter) GetHostInfo() (HostInfo) {
   if len(this.config.Hostname) > 0 {
     hostInfo.Hostnames = append(hostInfo.Hostnames, this.config.Hostname);
   }
+
+  data, err := exec.Command("uname").Output();
+  if err == nil {
+    hostInfo.Uname = string(data);
+  }
+
+  data, err = exec.Command("uname", "-a").Output();
+  if err == nil {
+    hostInfo.UnameA = string(data);
+  }
+
   // TODO get all hostnames and IP addresses for host
   return hostInfo;
 }

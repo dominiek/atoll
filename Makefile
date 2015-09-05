@@ -12,3 +12,6 @@ clean:
 
 test:
 	go test *.go
+
+test.verbose:
+	go test *.go -v
