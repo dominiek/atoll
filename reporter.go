@@ -63,6 +63,15 @@ func (this *Reporter) Report() (error) {
   return nil
 }
 
+func arrayContains(s []string, e string) bool {
+    for _, a := range s {
+        if a == e {
+            return true
+        }
+    }
+    return false
+}
+
 func (this *Reporter) GetHostInfo() (HostInfo) {
   hostInfo := HostInfo{};
   hostInfo.Hostnames = make([]string, 0);
@@ -91,7 +100,9 @@ func (this *Reporter) GetHostInfo() (HostInfo) {
     hostnames, err := net.LookupAddr(ipAddress)
     if err == nil {
       for _,hostname := range hostnames {
-        hostInfo.Hostnames = append(hostInfo.Hostnames, hostname);
+        if arrayContains(hostInfo.Hostnames, hostname) == false {
+          hostInfo.Hostnames = append(hostInfo.Hostnames, hostname);
+        }
       }
     }
   }
