@@ -6,8 +6,8 @@ import (
   "bytes"
   "net/http"
   "errors"
-  "os"
   "fmt"
+  "log"
   "encoding/json"
 )
 
@@ -51,7 +51,7 @@ func (this *Reporter) Report() (error) {
   if err != nil {
     return err
   }
-  fmt.Fprintf(os.Stdout, "Reported %s status to %s\n", this.moduleType, this.url);
+  log.Printf("Reported %s status to %s\n", this.moduleType, this.url);
   defer resp.Body.Close()
   if resp.StatusCode != 200 {
     return errors.New("Invalid response from Atoll server: " + resp.Status)
@@ -80,7 +80,7 @@ func (this *Reporter) Start() (error) {
   for this.running == true {
     err := this.Report();
     if err != nil {
-      fmt.Fprintf(os.Stderr, "Warning, could not report: %v\n", err);
+      log.Printf("Warning, could not report: %v\n", err);
     }
     time.Sleep(time.Duration(numSeconds) * time.Second);
   }

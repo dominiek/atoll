@@ -100,10 +100,6 @@ func main() {
       godaemon.MakeDaemon(&godaemon.DaemonAttr{})
     }
 
-    var data []byte;
-    data, err = config.ToJSON()
-    fmt.Printf("%s\n", data)
-
     url := fmt.Sprintf("http://%s:%d/1/report", config.Publish.Host, config.Publish.Port)
     log.Printf("Publish URL: %s\n", url);
     log.Printf("Publish Frequency: %s\n", config.Publish.Frequency);
