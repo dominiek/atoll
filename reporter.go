@@ -4,9 +4,11 @@ package main
 import (
   "time"
   "bytes"
+  "net"
   "net/http"
   "os/exec"
   "errors"
+  "strings"
   "fmt"
   "log"
   "encoding/json"
@@ -29,9 +31,10 @@ type Reporter struct {
 }
 
 type HostInfo struct {
-  Hostnames []string  `json:"hostnames"`;
-  Uname     string    `json:"uname"`;
-  UnameA    string    `json:"unameA"`;
+  Hostnames    []string  `json:"hostnames"`;
+  IpAddresses  []string  `json:"ipAddresses"`;
+  Uname        string    `json:"uname"`;
+  UnameA       string    `json:"unameA"`;
 }
 
 func (this *Reporter) Report() (error) {
@@ -67,18 +70,61 @@ func (this *Reporter) GetHostInfo() (HostInfo) {
     hostInfo.Hostnames = append(hostInfo.Hostnames, this.config.Hostname);
   }
 
-  data, err := exec.Command("uname").Output();
+  data, err := exec.Command("hostname").Output();
   if err == nil {
-    hostInfo.Uname = string(data);
+    hostInfo.Hostnames = append(hostInfo.Hostnames, strings.TrimSpace(string(data)));
+  }
+
+  data, err = exec.Command("uname").Output();
+  if err == nil {
+    hostInfo.Uname = strings.TrimSpace(string(data));
   }
 
   data, err = exec.Command("uname", "-a").Output();
   if err == nil {
-    hostInfo.UnameA = string(data);
+    hostInfo.UnameA = strings.TrimSpace(string(data));
   }
 
-  // TODO get all hostnames and IP addresses for host
+  hostInfo.IpAddresses = this.GetIpAddresses();
+
+  for _,ipAddress := range hostInfo.IpAddresses {
+    hostnames, err := net.LookupAddr(ipAddress)
+    if err == nil {
+      for _,hostname := range hostnames {
+        hostInfo.Hostnames = append(hostInfo.Hostnames, hostname);
+      }
+    }
+  }
+
   return hostInfo;
+}
+
+func (this *Reporter) GetIpAddresses() ([]string) {
+  ipAddresses := make([]string, 0);
+  interfaces, err := net.Interfaces()
+  if err != nil {
+    log.Printf("Warning could not get net.Interfaces information: %s\n", err);
+    return ipAddresses
+  }
+  for _, i := range interfaces {
+    addrs, err := i.Addrs()
+    if err == nil {
+      for _, addr := range addrs {
+        var ip net.IP
+        switch v := addr.(type) {
+          case *net.IPNet:
+            ip = v.IP
+          case *net.IPAddr:
+            ip = v.IP
+        }
+        ipnet := addr.(*net.IPNet);
+        if (!ipnet.IP.IsLoopback()) {
+          ipAddresses = append(ipAddresses, ip.String());
+        }
+      }
+    }
+  }
+  return ipAddresses;
 }
 
 func (this *Reporter) Start() (error) {
