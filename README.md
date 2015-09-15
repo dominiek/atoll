@@ -1,6 +1,6 @@
 # Atoll
 
-Simple JSON friendly system monitoring agent.
+A simple JSON friendly system monitoring agent.
 
 ## Build
 
@@ -11,7 +11,7 @@ make
 ## Run
 
 ```bash
-./bin/Atoll
+./bin/atoll
 ```
 
 ## Test
