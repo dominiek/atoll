@@ -24,7 +24,7 @@ make test.verbose
 ## Example: Docker Web app
 
 ```bash
-cd examples/docker/web-app
+cd examples/docker/web-app-small
 make
 make run
 ```
