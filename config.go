@@ -8,14 +8,15 @@ import (
 )
 
 type Config struct {
-  Hostname string `json:"hostname"`;
+  Hostname string `json:"hostname,omitempty" yaml:"hostname,omitempty"`;
   Publish struct {
-    Host string    `json:"host"`;
-    Port int       `json:"port"`;
-    Frequency string;
-  }               `json:"publish"`;
+    Host string    `json:"host" yaml:"host"`;
+    Port int       `json:"port" yaml:"port"`;
+    ApiKey string    `json:"apiKey,omitempty" yaml:"apiKey,omitempty"`;
+    Frequency string `json:"frequency" yaml:"frequency"`;
+  }               `json:"publish" yaml:"publish"`;
   Netstat struct {
-    IncludeLocal bool `json:"includeLocal"`;
+    IncludeLocal bool `json:"includeLocal,omitempty" yaml:"includeLocal,omitempty"`;
   }
 }
 

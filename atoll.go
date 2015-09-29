@@ -5,6 +5,7 @@ import (
   "os"
   "fmt"
   "log"
+  "errors"
   "github.com/codegangsta/cli"
   "github.com/VividCortex/godaemon"
 )
@@ -55,6 +56,11 @@ func main() {
           Usage: "Publish port to configure",
         },
         cli.StringFlag{
+          Name: "publish-api-key",
+          Value: "",
+          Usage: "API Key to use when publishing",
+        },
+        cli.StringFlag{
           Name: "frequency",
           Value: "5s",
           Usage: "Update frequency to configure",
@@ -68,6 +74,7 @@ func main() {
       Action: func(c *cli.Context) {
         config := Config{}
         config.Publish.Host = c.String("publish-host")
+        config.Publish.ApiKey = c.String("publish-api-key")
         config.Publish.Port = c.Int("publish-port")
         config.Publish.Frequency = c.String("frequency")
         config.Hostname = c.String("hostname")
@@ -100,7 +107,11 @@ func main() {
       godaemon.MakeDaemon(&godaemon.DaemonAttr{})
     }
 
-    url := fmt.Sprintf("http://%s:%d/1/report", config.Publish.Host, config.Publish.Port)
+    if (len(config.Publish.ApiKey) == 0) {
+      fatalError(errors.New("No apiKey configured, need this in order to publish to API"))
+    }
+
+    url := fmt.Sprintf("http://%s:%d/1/report/%s", config.Publish.Host, config.Publish.Port, config.Publish.ApiKey)
     log.Printf("Publish URL: %s\n", url);
     log.Printf("Publish Frequency: %s\n", config.Publish.Frequency);
     reporter := Reporter{&config, Netstat{config: &config}, true, "netstat", url};

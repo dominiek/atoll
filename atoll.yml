@@ -1,7 +1,5 @@
-hostname: ""
 publish:
   host: api.atoll.io
   port: 47011
   frequency: 5s
-netstat:
-  includelocal: false
+netstat: {}
