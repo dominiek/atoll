@@ -2,9 +2,9 @@
 
 all:
 	exec boot2docker shellinit
-	docker build -t atoll-server/api api
-	docker build -t atoll-server/app app
-	docker build -t atoll-server/mongodb mongodb
+	docker build --no-cache=true -t atoll-server/api api
+	docker build --no-cache=true -t atoll-server/app app
+	docker build --no-cache=true -t atoll-server/mongodb mongodb
 
 clean:
 	-docker kill `docker ps -a -q`
