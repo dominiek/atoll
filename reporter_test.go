@@ -45,6 +45,46 @@ func TestReporterWithNetstat(t *testing.T) {
   assert.Equal(t, len(keys) > 0, true)
 }
 
+func TestReporterWithPlugins(t *testing.T) {
+  config := Config{};
+  config.Hostname = "0.localhost"
+  config.Plugins = make([]string, 1);
+  config.Plugins[0] = "./bin/atoll-plugin-example"
+
+  var requestBody []byte
+  handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+    var err error
+    requestBody, err = ioutil.ReadAll(r.Body)
+    assert.Equal(t, err, nil)
+    fmt.Fprintln(w, `{}`)
+  })
+  ts := httptest.NewServer(handler)
+  defer ts.Close();
+
+  url := ts.URL
+  plugin := Plugin{config: &config, path: config.Plugins[0]}
+  reporter := Reporter{&config, plugin, true, "plugin", url};
+  err := reporter.Report();
+  assert.Equal(t, err, nil)
+
+  t.Logf("Mock URL for reporter: %v", url)
+  t.Logf("Data sent: %s", requestBody)
+
+  jsonParsed, err := gabs.ParseJSON(requestBody)
+  assert.Equal(t, err, nil)
+
+  hostnames, _ := jsonParsed.S("host").S("hostnames").Children()
+  assert.Equal(t, len(hostnames) > 0, true)
+
+  children, _ := jsonParsed.S("report").S("stats").ChildrenMap()
+  var keys = []string{}
+  for key := range children {
+    keys = append(keys, key)
+  }
+  assert.Equal(t, len(keys) > 0, true)
+}
+
 func TestReporterGetHostInfo(t *testing.T) {
   config := Config{};
   config.Hostname = "0.localhost"

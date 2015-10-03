@@ -18,6 +18,7 @@ type Config struct {
   Netstat struct {
     IncludeLocal bool `json:"includeLocal,omitempty" yaml:"includeLocal,omitempty"`;
   }
+  Plugins []string `json:"plugins,omitempty" yaml:"plugins,omitempty"`;
 }
 
 func (config *Config) LoadFile(path string) error {

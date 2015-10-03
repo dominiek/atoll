@@ -18,7 +18,7 @@ func main() {
   app := cli.NewApp()
   app.Name = "atoll"
   app.Usage = "Monitoring agent for Atoll"
-  app.Version = "0.1.2"
+  app.Version = "0.1.3"
   app.Flags = []cli.Flag {
     cli.StringFlag{
       Name: "config, c",
