@@ -38,6 +38,10 @@ func (this NetstatInfo) Encode() ([]byte, error) {
   return json.Marshal(this)
 }
 
+func (this NetstatInfo) GetType() (string) {
+  return "netstat";
+}
+
 func (this Netstat) Monitor() (Info, error) {
   data, err := this.run();
   var result NetstatInfo;
@@ -93,12 +97,12 @@ func (this *Netstat) parse(data string) (NetstatInfo, error) {
       remoteHost := establishedAddresses[i].Remote.Host
       if _, ok := service[remoteHost]; ok == true {
         result.Incoming[localPort][remoteHost] = NetstatConnection{
-          remoteHost, 
+          remoteHost,
           result.Incoming[localPort][remoteHost].Count + 1,
         };
       } else {
         result.Incoming[localPort][remoteHost] = NetstatConnection{
-          remoteHost, 
+          remoteHost,
           1,
         };
       }
@@ -111,12 +115,12 @@ func (this *Netstat) parse(data string) (NetstatInfo, error) {
     remoteHost := establishedAddresses[i].Remote.Host
     if _, ok := result.Outgoing[remotePort][remoteHost]; ok == true {
       result.Outgoing[remotePort][remoteHost] = NetstatConnection{
-        remoteHost, 
+        remoteHost,
         result.Outgoing[remotePort][remoteHost].Count + 1,
       };
     } else {
       result.Outgoing[remotePort][remoteHost] = NetstatConnection{
-        remoteHost, 
+        remoteHost,
         1,
       };
     }
@@ -144,7 +148,7 @@ func (this *Netstat) parseAddressPairs(data string, state string) []NetstatAddre
       }
       pairs = append(pairs, pair)
     }
-    
+
   }
   return pairs;
 }
@@ -153,16 +157,15 @@ func (this *Netstat) parseAddress(data string) NetstatAddress {
   hostPort := strings.Split(data, ":")
   if (len(hostPort) > 1) {
     return NetstatAddress{
-      NetstatHost(hostPort[0]), 
+      NetstatHost(hostPort[0]),
       NetstatPort(hostPort[len(hostPort)-1]),
     }
   } else {
     hostPort = strings.Split(data, ".")
     host := strings.Join(hostPort[0:len(hostPort)-1], ".")
     return NetstatAddress{
-      NetstatHost(host), 
+      NetstatHost(host),
       NetstatPort(hostPort[len(hostPort)-1]),
     }
   }
 }
-

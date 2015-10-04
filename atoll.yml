@@ -1,5 +1,8 @@
 publish:
   host: api.atoll.io
   port: 47011
+  apiKey: "test-cli"
   frequency: 5s
 netstat: {}
+plugins:
+  - ./bin/atoll-plugin-example

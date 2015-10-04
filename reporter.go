@@ -16,6 +16,7 @@ import (
 
 type Info interface {
   Encode() ([]byte, error);
+  GetType() (string);
 }
 
 type Module interface {
@@ -47,7 +48,7 @@ func (this *Reporter) Report() (error) {
     return err
   }
   hostData, err := json.Marshal(this.GetHostInfo());
-  envelope := fmt.Sprintf(`{"host":%s,"report":%s}`, hostData, reportData);
+  envelope := fmt.Sprintf(`{"type":"%s","host":%s,"report":%s}`, info.GetType(), hostData, reportData);
   req, err := http.NewRequest("POST", this.url, bytes.NewBuffer([]byte(envelope)))
   req.Header.Set("Content-Type", "application/json")
   client := &http.Client{}
@@ -55,7 +56,7 @@ func (this *Reporter) Report() (error) {
   if err != nil {
     return err
   }
-  log.Printf("Reported %s status to %s\n", this.moduleType, this.url);
+  log.Printf("Reported %s (%s) status to %s\n", info.GetType(), this.moduleType, this.url);
   defer resp.Body.Close()
   if resp.StatusCode != 200 {
     return errors.New("Invalid response from Atoll server: " + resp.Status)

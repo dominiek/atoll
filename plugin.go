@@ -25,6 +25,10 @@ func (this PluginInfo) Encode() ([]byte, error) {
   return this.reportData, nil;
 }
 
+func (this PluginInfo) GetType() (string) {
+  return this.id;
+}
+
 func (this Plugin) Monitor() (Info, error) {
   data, err := this.run(this.path);
   var result PluginInfo;
@@ -38,12 +42,12 @@ func (this Plugin) Monitor() (Info, error) {
     return result, err;
   }
 
-  result.id = jsonParsed.Path("id").String();
+  result.id = jsonParsed.Path("id").Data().(string);
   if len(result.id) == 0 {
     return result, errors.New("Invalid plugin response, need id")
   }
 
-  result.name = jsonParsed.Path("name").String();
+  result.name = jsonParsed.Path("name").Data().(string);
   if len(result.name) == 0 {
     return result, errors.New("Invalid plugin response, need name")
   }

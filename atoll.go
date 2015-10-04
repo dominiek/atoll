@@ -3,7 +3,6 @@ package main
 
 import (
   "os"
-  "fmt"
   "log"
   "errors"
   "github.com/codegangsta/cli"
@@ -111,11 +110,8 @@ func main() {
       fatalError(errors.New("No apiKey configured, need this in order to publish to API"))
     }
 
-    url := fmt.Sprintf("http://%s:%d/1/report/%s", config.Publish.Host, config.Publish.Port, config.Publish.ApiKey)
-    log.Printf("Publish URL: %s\n", url);
-    log.Printf("Publish Frequency: %s\n", config.Publish.Frequency);
-    reporter := Reporter{&config, Netstat{config: &config}, true, "netstat", url};
-    err = reporter.Start();
+    daemon := Daemon{&config, false};
+    err = daemon.Start();
     if err != nil {
       log.Fatalf("Error: %v\n", err)
     }
