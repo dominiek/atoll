@@ -4,5 +4,3 @@ publish:
   apiKey: "test-cli"
   frequency: 5s
 netstat: {}
-plugins:
-  - ./bin/atoll-plugin-example
