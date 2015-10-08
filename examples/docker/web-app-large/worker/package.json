@@ -1,9 +1,8 @@
 {
   "name": "api",
   "version": "0.0.1",
-  "description": "API test",
+  "description": "Worker test",
   "dependencies": {
-    "mongodb": "*",
     "amqp": "*"
   }
 }
