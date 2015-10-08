@@ -42,9 +42,19 @@ func (this Plugin) Monitor() (Info, error) {
     return result, err;
   }
 
+  idJson := jsonParsed.Path("id").String();
+  if idJson == "{}" {
+    return result, errors.New("Invalid plugin response, need id")
+  }
+
   result.id = jsonParsed.Path("id").Data().(string);
   if len(result.id) == 0 {
     return result, errors.New("Invalid plugin response, need id")
+  }
+
+  nameJson := jsonParsed.Path("name").String();
+  if nameJson == "{}" {
+    return result, errors.New("Invalid plugin response, need name")
   }
 
   result.name = jsonParsed.Path("name").Data().(string);
