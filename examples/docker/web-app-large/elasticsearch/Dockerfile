@@ -14,7 +14,7 @@ RUN     echo "deb https://deb.packager.io/gh/dominiek/atoll-elasticsearch trusty
 RUN     apt-get update
 RUN     apt-get install -y atoll-elasticsearch
 RUN     echo "plugins:" >> /opt/atoll/atoll.yml
-RUN     echo "  - /opt/atoll-elasticsearch/bin/atoll-elasticsearch" >> /opt/atoll/atoll.yml 
+RUN     echo "  - /opt/atoll-elasticsearch/bin/atoll-elasticsearch" >> /opt/atoll/atoll.yml
 
 # Install Elasticsearch
 RUN     apt-get install -y software-properties-common python-software-properties
@@ -25,4 +25,5 @@ RUN     apt-get update
 RUN     echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
 RUN     apt-get install -y oracle-java8-installer elasticsearch curl
 
+EXPOSE  9200
 CMD ./opt/atoll/bin/atoll -c /opt/atoll/atoll.yml -d && /usr/share/elasticsearch/bin/elasticsearch

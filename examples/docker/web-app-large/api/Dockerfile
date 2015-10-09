@@ -12,4 +12,4 @@ COPY    . /deploy
 RUN     cd /deploy; npm install
 EXPOSE  80
 
-CMD ./opt/atoll/bin/atoll -c /opt/atoll/atoll.yml -d && node /deploy/app.js
+CMD ./opt/atoll/bin/atoll -c /opt/atoll/atoll.yml -d && node /deploy/producer.js & node /deploy/app.js

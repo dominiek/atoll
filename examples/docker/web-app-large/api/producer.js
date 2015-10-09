@@ -1,11 +1,11 @@
 
 var amqp = require('amqp');
 
-var connection = amqp.createConnection({ host: 'amqp://guest:guest@localhost:5672' });
+var connection = amqp.createConnection({ host: 'amqp://guest:guest@0.worker:5672' });
 
 var publish = function(exchange, callback) {
   console.log("Publishing message")
-  exchange.publish("bla", {ts: Date.now()}, {mandatory: true}, function(err) {
+  exchange.publish("#", {ts: Date.now()}, {mandatory: true}, function(err) {
     console.log('done', err)
   });
   setTimeout(publish.bind(publish, exchange, callback), 100);
@@ -15,7 +15,7 @@ var publish = function(exchange, callback) {
 connection.on('ready', function () {
   console.log("Ready")
   // Use the default 'amq.topic' exchange
-  var exc = connection.exchange('my-new-exchange', {type: 'fanout', durable: true, autoDelete: false}, function (exchange) {
+  var exc = connection.exchange('amq.topic', {type: 'fanout', durable: true, autoDelete: false}, function (exchange) {
     console.log('Exchange ' + exchange.name + ' is open');
     publish(exchange);
   });
