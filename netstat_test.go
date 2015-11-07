@@ -4,6 +4,7 @@ import (
   "testing"
   "github.com/stretchr/testify/assert"
   "encoding/json"
+  "fmt"
 )
 
 func TestNetstatMonitor(t *testing.T) {
@@ -99,7 +100,8 @@ tcp6       0      0  ::1.631                *.*                    LISTEN       
 
 func TestNetstatParseDarwin(t *testing.T) {
   netstat := Netstat{}
-  result, err := netstat.parse(darwinOutput);
+  result := NetstatInfo{}
+  err := netstat.parse(&result, darwinOutput);
   if err != nil {
     t.Fatalf("Did not expect error %v", err)
   }
@@ -113,11 +115,11 @@ func TestNetstatParseDarwin(t *testing.T) {
 }
 
 const linuxOutput string = `Active Internet connections (servers and established)
-Proto Recv-Q Send-Q Local Address           Foreign Address         State      
-tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN     
-tcp        0      0 0.0.0.0:15672           0.0.0.0:*               LISTEN     
-tcp        0      0 0.0.0.0:25              0.0.0.0:*               LISTEN     
-tcp        0      0 0.0.0.0:25672           0.0.0.0:*               LISTEN     
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:15672           0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:25              0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:25672           0.0.0.0:*               LISTEN
 tcp        0      0 10.45.10.220:57985      10.45.10.220:5672       ESTABLISHED
 tcp        0      0 10.45.10.220:49172      10.45.10.222:27018      ESTABLISHED
 tcp        0      0 10.45.10.220:46965      10.45.10.222:27018      ESTABLISHED
@@ -128,7 +130,8 @@ tcp        0      0 10.45.10.220:57983      10.45.10.198:443       ESTABLISHED
 
 func TestNetstatParseLinux(t *testing.T) {
   netstat := Netstat{}
-  result, err := netstat.parse(linuxOutput);
+  result := NetstatInfo{}
+  err := netstat.parse(&result, linuxOutput);
   if err != nil {
     t.Fatalf("Did not expect error %v", err)
   }
@@ -139,4 +142,42 @@ func TestNetstatParseLinux(t *testing.T) {
   }
   t.Logf("JSON %s", data)
   assert.Contains(t, string(data), `"22":{}`)
+}
+
+func generateOutput(host string) (string) {
+  return fmt.Sprintf(`Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        0      0 10.45.10.220:57985      %s:5672       ESTABLISHED
+  `, host)
+}
+
+func TestNetstatCombineMultipleResults(t *testing.T) {
+  netstat := Netstat{}
+  info := NetstatInfo{}
+  err := netstat.parse(&info, generateOutput("10.45.10.221"));
+  if err != nil {
+    t.Fatalf("Did not expect error %v", err)
+  }
+  assert.EqualValues(t, info.Outgoing["5672"]["10.45.10.221"].Count, 1)
+
+  err = netstat.parse(&info, generateOutput("10.45.10.222"));
+  if err != nil {
+    t.Fatalf("Did not expect error %v", err)
+  }
+  assert.EqualValues(t, info.Outgoing["5672"]["10.45.10.221"].Count, 1)
+  assert.EqualValues(t, info.Outgoing["5672"]["10.45.10.222"].Count, 1)
+
+  err = netstat.parse(&info, generateOutput("10.45.10.222"));
+  if err != nil {
+    t.Fatalf("Did not expect error %v", err)
+  }
+  assert.EqualValues(t, info.Outgoing["5672"]["10.45.10.221"].Count, 1)
+  assert.EqualValues(t, info.Outgoing["5672"]["10.45.10.222"].Count, 2)
+
+  data, err := json.Marshal(info)
+  if err != nil {
+    t.Fatalf("Did not expect error %v", err)
+  }
+  t.Logf("JSON %s", data)
+  assert.Contains(t, string(data), `"5672":{`)
 }

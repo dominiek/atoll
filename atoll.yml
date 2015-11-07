@@ -3,4 +3,3 @@ publish:
   port: 47011
   apiKey: "test-cli"
   frequency: 5s
-netstat: {}

@@ -32,6 +32,7 @@ type NetstatInfo struct {
 
 type Netstat struct {
   config *Config;
+  currentInfo NetstatInfo;
 };
 
 func (this NetstatInfo) Encode() ([]byte, error) {
@@ -44,13 +45,16 @@ func (this NetstatInfo) GetType() (string) {
 
 func (this Netstat) Monitor() (Info, error) {
   data, err := this.run();
-  var result NetstatInfo;
   if err != nil {
-    return result, err;
+    return this.currentInfo, err;
   }
-  result, err = this.parse(data)
-  info := Info(result);
+  err = this.parse(&this.currentInfo, data)
+  info := Info(this.currentInfo);
   return info, err
+}
+
+func (this Netstat) ClearResults() () {
+  this.currentInfo = NetstatInfo{};
 }
 
 func (this *Netstat) run() (string, error) {
@@ -82,10 +86,13 @@ func (this *Netstat) determineCommand() (string, error) {
   }
 }
 
-func (this *Netstat) parse(data string) (NetstatInfo, error) {
-  result := NetstatInfo{}
-  result.Incoming = make(NetstatServices)
-  result.Outgoing = make(NetstatServices)
+func (this *Netstat) parse(result *NetstatInfo, data string) (error) {
+  if len(result.Incoming) < 1 {
+    result.Incoming = make(NetstatServices)
+  }
+  if len(result.Outgoing) < 1 {
+    result.Outgoing = make(NetstatServices)
+  }
   listenAddresses := this.parseAddressPairs(data, "LISTEN")
   for i := 0; len(listenAddresses) > i; i++ {
     result.Incoming[listenAddresses[i].Local.Port] = make(NetstatConnections)
@@ -125,7 +132,7 @@ func (this *Netstat) parse(data string) (NetstatInfo, error) {
       };
     }
   }
-  return result, nil
+  return nil
 }
 
 func (this *Netstat) parseAddressPairs(data string, state string) []NetstatAddressPair {

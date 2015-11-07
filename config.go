@@ -17,7 +17,8 @@ type Config struct {
   }               `json:"publish" yaml:"publish"`;
   Netstat struct {
     IncludeLocal bool `json:"includeLocal,omitempty" yaml:"includeLocal,omitempty"`;
-  }
+    CheckFrequency string `json:"checkFrequency" yaml:"checkFrequency"`;
+  }               `json:"netstat" yaml:"netstat"`;
   Plugins []string `json:"plugins,omitempty" yaml:"plugins,omitempty"`;
 }
 
