@@ -144,30 +144,61 @@ func TestNetstatParseLinux(t *testing.T) {
   assert.Contains(t, string(data), `"22":{}`)
 }
 
-func generateOutput(host string) (string) {
+const centosOutput string = `Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address               Foreign Address             State
+tcp        0      0 0.0.0.0:80                  0.0.0.0:*                   LISTEN
+tcp        0      0 172.17.2.86:47781           172.17.2.84:80              TIME_WAIT
+tcp        0      0 172.17.2.86:47623           172.17.2.84:80              TIME_WAIT
+tcp        0      0 172.17.2.86:47708           172.17.2.84:80              TIME_WAIT
+tcp        0      0 172.17.2.86:34439           172.17.2.85:80              TIME_WAIT`
+
+func TestNetstatParseCentos(t *testing.T) {
+  netstat := Netstat{}
+  result := NetstatInfo{}
+  err := netstat.parse(&result, centosOutput);
+  if err != nil {
+    t.Fatalf("Did not expect error %v", err)
+  }
+  assert.EqualValues(t, result.Outgoing["80"]["172.17.2.84"].Count, 3)
+  data, err := json.Marshal(result)
+  if err != nil {
+    t.Fatalf("Did not expect error %v", err)
+  }
+  t.Logf("JSON %s", data)
+  assert.Contains(t, string(data), `"80":{`)
+}
+
+func generateOutput(host string, port int) (string) {
   return fmt.Sprintf(`Active Internet connections (servers and established)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State
-tcp        0      0 10.45.10.220:57985      %s:5672       ESTABLISHED
-  `, host)
+tcp        0      0 10.45.10.220:57985      %s:%d       ESTABLISHED
+  `, host, port)
 }
 
 func TestNetstatCombineMultipleResults(t *testing.T) {
   netstat := Netstat{}
   info := NetstatInfo{}
-  err := netstat.parse(&info, generateOutput("10.45.10.221"));
+  err := netstat.parse(&info, generateOutput("10.45.10.221", 5672));
   if err != nil {
     t.Fatalf("Did not expect error %v", err)
   }
   assert.EqualValues(t, info.Outgoing["5672"]["10.45.10.221"].Count, 1)
 
-  err = netstat.parse(&info, generateOutput("10.45.10.222"));
+  err = netstat.parse(&info, generateOutput("10.45.10.222", 5672));
   if err != nil {
     t.Fatalf("Did not expect error %v", err)
   }
   assert.EqualValues(t, info.Outgoing["5672"]["10.45.10.221"].Count, 1)
   assert.EqualValues(t, info.Outgoing["5672"]["10.45.10.222"].Count, 1)
 
-  err = netstat.parse(&info, generateOutput("10.45.10.222"));
+  err = netstat.parse(&info, generateOutput("10.45.10.222", 4000));
+  if err != nil {
+    t.Fatalf("Did not expect error %v", err)
+  }
+  assert.EqualValues(t, info.Outgoing["5672"]["10.45.10.221"].Count, 1)
+  assert.EqualValues(t, info.Outgoing["5672"]["10.45.10.222"].Count, 1)
+
+  err = netstat.parse(&info, generateOutput("10.45.10.222", 5672));
   if err != nil {
     t.Fatalf("Did not expect error %v", err)
   }

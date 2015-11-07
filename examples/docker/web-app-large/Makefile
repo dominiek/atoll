@@ -1,12 +1,12 @@
-
+BUILD_PARAMS=--no-cache=false
 
 all:
 	exec boot2docker shellinit
-	docker build -t atoll-server/api api
-	docker build -t atoll-server/app app
-	docker build -t atoll-server/mongodb mongodb
-	docker build -t atoll-server/elasticsearch elasticsearch
-	docker build -t atoll-server/worker worker
+	docker build $(BUILD_PARAMS) -t atoll-server/api api
+	docker build $(BUILD_PARAMS) -t atoll-server/app app
+	docker build $(BUILD_PARAMS) -t atoll-server/mongodb mongodb
+	docker build $(BUILD_PARAMS) -t atoll-server/elasticsearch elasticsearch
+	docker build $(BUILD_PARAMS) -t atoll-server/worker worker
 
 
 clean:

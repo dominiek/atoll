@@ -93,11 +93,11 @@ func (this *Netstat) parse(result *NetstatInfo, data string) (error) {
   if len(result.Outgoing) < 1 {
     result.Outgoing = make(NetstatServices)
   }
-  listenAddresses := this.parseAddressPairs(data, "LISTEN")
+  listenAddresses := this.parseAddressPairs(data, []string{"LISTEN"})
   for i := 0; len(listenAddresses) > i; i++ {
     result.Incoming[listenAddresses[i].Local.Port] = make(NetstatConnections)
   }
-  establishedAddresses := this.parseAddressPairs(data, "ESTABLISHED")
+  establishedAddresses := this.parseAddressPairs(data, []string{"ESTABLISHED", "TIME_WAIT"})
   for i := 0; len(establishedAddresses) > i; i++ {
     localPort := establishedAddresses[i].Local.Port
     if service, ok := result.Incoming[localPort]; ok == true {
@@ -135,7 +135,7 @@ func (this *Netstat) parse(result *NetstatInfo, data string) (error) {
   return nil
 }
 
-func (this *Netstat) parseAddressPairs(data string, state string) []NetstatAddressPair {
+func (this *Netstat) parseAddressPairs(data string, states []string) []NetstatAddressPair {
   lines := strings.Split(data, "\n");
   pairs := make([]NetstatAddressPair, 0);
   for i := 1; len(lines) > i; i++ {
@@ -146,16 +146,17 @@ func (this *Netstat) parseAddressPairs(data string, state string) []NetstatAddre
     if (line[0] == "tcp6") {
       continue
     }
-    if line[5] == state {
-      localAddress := this.parseAddress(line[3])
-      remoteAddress := this.parseAddress(line[4])
-      pair := NetstatAddressPair{
-        localAddress,
-        remoteAddress,
+    for _,state := range(states) {
+      if line[5] == state {
+        localAddress := this.parseAddress(line[3])
+        remoteAddress := this.parseAddress(line[4])
+        pair := NetstatAddressPair{
+          localAddress,
+          remoteAddress,
+        }
+        pairs = append(pairs, pair)
       }
-      pairs = append(pairs, pair)
     }
-
   }
   return pairs;
 }

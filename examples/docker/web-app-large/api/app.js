@@ -6,9 +6,11 @@ const PORT=80;
 
 //We need a function which handles requests and send response
 function handleRequest(request, response){
-  response.end(JSON.stringify({
-    "success": true
-  }));
+  setTimeout(function() {
+    response.end(JSON.stringify({
+      "success": true
+    }));
+  }, 100);
 }
 
 // Retrieve
@@ -20,6 +22,10 @@ MongoClient.connect("mongodb://0.mongodb:27017/test,mongodb://1.mongodb:27017/te
     return console.error("MongoDB Error: " + err.message)
   }
   console.log("We are connected");
+  var collection = db.collection('stuff');
+  setInterval(function() {
+    collection.insert({timestamp: Date.now()}, function() {})
+  }, 3000);
 });
 
 //Create a server

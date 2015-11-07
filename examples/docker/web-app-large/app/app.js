@@ -21,12 +21,17 @@ MongoClient.connect("mongodb://0.mongodb:27017/test,mongodb://1.mongodb:27017/te
     return console.error("MongoDB Error: " + err.message)
   }
   console.log("We are connected");
+  var collection = db.collection('stuff');
+  setInterval(function() {
+    collection.insert({timestamp: Date.now()}, function() {})
+  }, 3000);
 });
 
 setInterval(function() {
   request.get("http://0.api", function() {})
   request.get("http://1.api", function() {})
 }, 1000);
+
 
 //Create a server
 var server = http.createServer(handleRequest);

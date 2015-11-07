@@ -1,7 +1,7 @@
 
 var amqp = require('amqp');
 
-var connection = amqp.createConnection({ host: 'amqp://guest:guest@0.worker:5672' });
+var connection = amqp.createConnection({ host: 'amqp://guest:guest@'+process.argv[2]+':5672' });
 
 var publish = function(exchange, callback) {
   console.log("Publishing message")
