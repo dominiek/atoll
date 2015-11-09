@@ -1,4 +1,4 @@
-BUILD_PARAMS=--no-cache=false
+BUILD_PARAMS=--no-cache=true
 
 all:
 	exec boot2docker shellinit

@@ -15,3 +15,15 @@ test:
 
 test.verbose:
 	go test *.go -v
+
+test.linux:
+	docker build -t atoll-test .
+	docker run -e BUILD_COMMAND="make test" -t atoll-test
+
+test.linux.verbose:
+	docker build -t atoll-test .
+	docker run -e BUILD_COMMAND="make test.verbose" -t atoll-test
+
+linux.shell:
+	docker build -t atoll-test .
+	docker run -i -t atoll-test /bin/bash
