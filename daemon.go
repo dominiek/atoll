@@ -19,12 +19,13 @@ func (this *Daemon) Start() (error) {
   log.Printf("Publish Frequency: %s\n", this.config.Publish.Frequency);
 
   netstat := Netstat{config: this.config}
+  system := System{config: this.config}
   reporters := make([]Reporter, 0);
-  reporters = append(reporters, Reporter{this.config, netstat, true, "netstat", url});
+  reporters = append(reporters, Reporter{this.config, []Module{netstat, system}, true, "core", url});
 
   for _, command := range this.config.Plugins {
     plugin := Plugin{this.config, command};
-    reporters = append(reporters, Reporter{this.config, plugin, true, "plugin", url});
+    reporters = append(reporters, Reporter{this.config, []Module{plugin}, true, "plugin", url});
   }
 
   this.running = true;

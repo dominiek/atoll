@@ -25,7 +25,7 @@ type Module interface {
 
 type Reporter struct {
   config *Config;
-  module Module;
+  modules []Module;
   running bool;
   moduleType string;
   url string;
@@ -39,16 +39,23 @@ type HostInfo struct {
 }
 
 func (this *Reporter) Report() (error) {
-  info, err := this.module.Monitor();
-  if err != nil {
-    return err;
-  }
-  reportData, err := info.Encode();
-  if err != nil {
-    return err
+  reportsData := make([]string, 0);
+  for i := range(this.modules) {
+    info, err := this.modules[i].Monitor();
+    if err != nil {
+      return err;
+    }
+    reportData, err := info.Encode();
+    if err != nil {
+      return err
+    }
+    reportDataStr := string(reportData)
+    reportDataStr = fmt.Sprintf(`{"type":"%s","report":%s}`, info.GetType(), reportDataStr);
+    reportsData = append(reportsData, reportDataStr);
   }
   hostData, err := json.Marshal(this.GetHostInfo());
-  envelope := fmt.Sprintf(`{"type":"%s","host":%s,"report":%s}`, info.GetType(), hostData, reportData);
+  reportsDataJson := fmt.Sprintf("[%s]", strings.Join(reportsData, ","))
+  envelope := fmt.Sprintf(`{"host":%s,"reports":%s}`, hostData, reportsDataJson);
   req, err := http.NewRequest("POST", this.url, bytes.NewBuffer([]byte(envelope)))
   req.Header.Set("Content-Type", "application/json")
   client := &http.Client{}
@@ -56,7 +63,7 @@ func (this *Reporter) Report() (error) {
   if err != nil {
     return err
   }
-  log.Printf("Reported %s (%s) status to %s\n", info.GetType(), this.moduleType, this.url);
+  log.Printf("Reported %s status to %s\n", this.moduleType, this.url);
   defer resp.Body.Close()
   if resp.StatusCode != 200 {
     return errors.New("Invalid response from Atoll server: " + resp.Status)

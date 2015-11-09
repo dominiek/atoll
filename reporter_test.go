@@ -26,7 +26,7 @@ func TestReporterWithNetstat(t *testing.T) {
   defer ts.Close();
 
   url := ts.URL
-  reporter := Reporter{&config, Netstat{config: &config}, true, "netstat", url};
+  reporter := Reporter{&config, []Module{Netstat{config: &config}}, true, "netstat", url};
   err := reporter.Report();
 
   t.Logf("Mock URL for reporter: %v", url)
@@ -64,7 +64,7 @@ func TestReporterWithPlugins(t *testing.T) {
 
   url := ts.URL
   plugin := Plugin{config: &config, path: config.Plugins[0]}
-  reporter := Reporter{&config, plugin, true, "plugin", url};
+  reporter := Reporter{&config, []Module{plugin}, true, "plugin", url};
   err := reporter.Report();
   assert.Equal(t, err, nil)
 
@@ -77,7 +77,7 @@ func TestReporterWithPlugins(t *testing.T) {
   hostnames, _ := jsonParsed.S("host").S("hostnames").Children()
   assert.Equal(t, len(hostnames) > 0, true)
 
-  children, _ := jsonParsed.S("report").S("stats").ChildrenMap()
+  children, _ := jsonParsed.S("reports").Index(0).S("report").S("stats").ChildrenMap()
   var keys = []string{}
   for key := range children {
     keys = append(keys, key)
@@ -88,7 +88,7 @@ func TestReporterWithPlugins(t *testing.T) {
 func TestReporterGetHostInfo(t *testing.T) {
   config := Config{};
   config.Hostname = "0.localhost"
-  reporter := Reporter{&config, Netstat{config: &config}, true, "netstat", "http://localhost:47011"};
+  reporter := Reporter{&config, []Module{Netstat{config: &config}}, true, "netstat", "http://localhost:47011"};
   hostInfo := reporter.GetHostInfo();
   t.Logf("hostInfo: %v", hostInfo)
   assert.Equal(t, len(hostInfo.Uname) > 1, true)
