@@ -1,9 +1,0 @@
-{
-  "name": "apir",
-  "version": "0.0.1",
-  "description": "API test",
-  "dependencies": {
-    "mongodb": "*",
-    "request": "*"
-  }
-}
